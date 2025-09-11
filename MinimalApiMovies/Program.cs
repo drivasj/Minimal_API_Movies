@@ -68,3 +68,5 @@ app.MapGet("/generos", () =>
 // End Middleware area 
 
 app.Run();
+
+//dotnet tool install --global dotnet-ef
