@@ -19,6 +19,9 @@ builder.Services.AddCors(options =>
        configuration.AllowAnyOrigin().AllowAnyOrigin().AllowAnyMethod();  //  (Any website can communicate with us in any way.);
     });
 });
+
+// Enable Cache
+builder.Services.AddOutputCache();
  
 
 // End services area
@@ -28,6 +31,7 @@ var app = builder.Build();
 // Middleware area
 
 app.UseCors();
+app.UseOutputCache();
 
 app.MapGet("/", [EnableCors(policyName: "libre")] () => "Hello Worldd!");
 
@@ -52,7 +56,7 @@ app.MapGet("/generos", () =>
         },
     };
     return generos;
-});
+}).CacheOutput(c=>c.Expire(TimeSpan.FromSeconds(15)));
 
 // End Middleware area 
 
