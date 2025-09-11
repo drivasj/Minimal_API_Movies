@@ -22,13 +22,20 @@ builder.Services.AddCors(options =>
 
 // Enable Cache
 builder.Services.AddOutputCache();
- 
+
+// Swagger
+builder.Services.AddEndpointsApiExplorer(); // Explora todos los EndPoinsts
+builder.Services.AddSwaggerGen();
 
 // End services area
-
 var app = builder.Build();
 
 // Middleware area
+if (builder.Environment.IsDevelopment()) 
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseCors();
 app.UseOutputCache();
