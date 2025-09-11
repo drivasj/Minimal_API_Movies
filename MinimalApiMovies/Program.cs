@@ -1,19 +1,35 @@
 
+using Microsoft.AspNetCore.Cors;
 using MinimalApiMovies.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermitidos");
 // Services area
 
-// End services area
+// Enable Cors
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(configuration =>
+    {
+        configuration.WithOrigins(origenesPermitidos).AllowAnyOrigin().AllowAnyMethod();  //  (Any website can communicate with us in any specific)
+    });
 
+    options.AddPolicy("libre", configuration =>
+    {
+       configuration.AllowAnyOrigin().AllowAnyOrigin().AllowAnyMethod();  //  (Any website can communicate with us in any way.);
+    });
+});
+ 
+
+// End services area
 
 var app = builder.Build();
 
 // Middleware area
 
-app.MapGet("/", () => "Hello Worldd!");
+app.UseCors();
 
+app.MapGet("/", [EnableCors(policyName: "libre")] () => "Hello Worldd!");
 
 app.MapGet("/generos", () =>
 {
@@ -24,11 +40,12 @@ app.MapGet("/generos", () =>
             Id = 1,
             Name = "Drama",
         },
-                new Genero
+        new Genero
         {
             Id = 2,
             Name = "Acción",
-        },        new Genero
+        }, 
+        new Genero
         {
             Id = 3,
             Name = "Comedia",
