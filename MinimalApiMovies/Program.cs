@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using MinimalApiMovies;
 using MinimalApiMovies.Entities;
@@ -58,7 +59,7 @@ app.MapGet("/generos", async (IRepositoryGeneros repository) =>
 {
     return await repository.GetAll();
 
-}).CacheOutput(c=>c.Expire(TimeSpan.FromSeconds(15)));
+}).CacheOutput(c=>c.Expire(TimeSpan.FromSeconds(60)).Tag("generos-get"));
 
 // Obtener un genero por Id
 app.MapGet("/generos/{id:int}", async (IRepositoryGeneros repository, int id) =>
@@ -74,9 +75,10 @@ app.MapGet("/generos/{id:int}", async (IRepositoryGeneros repository, int id) =>
 });
 
 // Crear un genero
-app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository) =>
+app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
 {
     var id = await repository.Create(genero);
+    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
     return Results.Created($"/generos/{id}", genero);
 });
 

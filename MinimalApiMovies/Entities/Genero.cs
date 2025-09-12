@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace MinimalApiMovies.Entities
 {
@@ -8,3 +9,9 @@ namespace MinimalApiMovies.Entities
         public string Name { get; set; }
     }
 }
+
+
+
+//Acción
+//DRAMA
+//Comedia
