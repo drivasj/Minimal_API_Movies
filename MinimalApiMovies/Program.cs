@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.EntityFrameworkCore;
 using MinimalApiMovies;
 using MinimalApiMovies.Entities;
+using MinimalApiMovies.Repositorys;
+using MinimalApiMovies.Repositorys.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermitidos");
@@ -33,6 +35,9 @@ builder.Services.AddOutputCache();
 builder.Services.AddEndpointsApiExplorer(); // Explora todos los EndPoinsts
 builder.Services.AddSwaggerGen();
 
+//Interfaces
+builder.Services.AddScoped<IRepositoryGeneros, RepositoryGeneros>();
+
 // End services area
 var app = builder.Build();
 
@@ -48,28 +53,32 @@ app.UseOutputCache();
 
 app.MapGet("/", [EnableCors(policyName: "libre")] () => "Hello Worldd!");
 
-app.MapGet("/generos", () =>
+// Obtener todos los generos
+app.MapGet("/generos", async (IRepositoryGeneros repository) =>
 {
-    var generos = new List<Genero>
-    {
-        new Genero
-        {
-            Id = 1,
-            Name = "Drama",
-        },
-        new Genero
-        {
-            Id = 2,
-            Name = "Acción",
-        }, 
-        new Genero
-        {
-            Id = 3,
-            Name = "Comedia",
-        },
-    };
-    return generos;
+    return await repository.GetAll();
+
 }).CacheOutput(c=>c.Expire(TimeSpan.FromSeconds(15)));
+
+// Obtener un genero por Id
+app.MapGet("/generos/{id:int}", async (IRepositoryGeneros repository, int id) =>
+{
+    var genero = await repository.GetId(id);
+
+    if(genero is null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(genero);
+
+});
+
+// Crear un genero
+app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository) =>
+{
+    var id = await repository.Create(genero);
+    return Results.Created($"/generos/{id}", genero);
+});
 
 // End Middleware area 
 
