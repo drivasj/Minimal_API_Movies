@@ -22,7 +22,7 @@ namespace MinimalApiMovies.Repositorys
 
         public async Task<List<Genero>> GetAll()
         {
-            return await context.Generos.ToListAsync();
+            return await context.Generos.OrderBy(x=>x.Name).ToListAsync();
         }
 
         public Task<Genero?> GetId(int id)
