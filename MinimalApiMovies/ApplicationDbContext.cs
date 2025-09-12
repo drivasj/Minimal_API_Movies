@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MinimalApiMovies.Entities;
 
 namespace MinimalApiMovies
 {
@@ -8,5 +9,14 @@ namespace MinimalApiMovies
         {
             
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Genero>().Property(p => p.Name).HasMaxLength(50);
+        }
+
+        public DbSet<Genero> Generos { get; set; }
     }
 }
