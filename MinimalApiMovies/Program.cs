@@ -1,10 +1,16 @@
 
 using Microsoft.AspNetCore.Cors;
+using Microsoft.EntityFrameworkCore;
+using MinimalApiMovies;
 using MinimalApiMovies.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermitidos");
 // Services area
+
+//SQL SERVER
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
+        options.UseSqlServer("name=DefaultConnection"));
 
 // Enable Cors
 builder.Services.AddCors(options =>
