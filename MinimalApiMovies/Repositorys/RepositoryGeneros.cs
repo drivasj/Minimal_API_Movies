@@ -20,6 +20,11 @@ namespace MinimalApiMovies.Repositorys
             return genero.Id;
         }
 
+        public async Task<bool> Exist(int id)
+        {
+            return await context.Generos.AnyAsync(x=>x.Id == id);
+        }
+
         public async Task<List<Genero>> GetAll()
         {
             return await context.Generos.OrderBy(x=>x.Name).ToListAsync();
@@ -28,6 +33,12 @@ namespace MinimalApiMovies.Repositorys
         public Task<Genero?> GetId(int id)
         {
             return context.Generos.FirstOrDefaultAsync(x=>x.Id == id);
+        }
+
+        public async Task Update(Genero genero)
+        {
+            context.Update(genero);
+            await context.SaveChangesAsync();
         }
     }
 }

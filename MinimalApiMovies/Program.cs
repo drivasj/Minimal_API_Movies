@@ -74,12 +74,29 @@ app.MapGet("/generos/{id:int}", async (IRepositoryGeneros repository, int id) =>
 
 });
 
+
 // Crear un genero
 app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
 {
     var id = await repository.Create(genero);
     await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
     return Results.Created($"/generos/{id}", genero);
+});
+
+//
+
+app.MapPut("/generos/{id:int}", async (int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
+{
+    var exist = await repository.Exist(id);
+
+    if (!exist)
+    {
+        return Results.NotFound();
+    }
+
+    await repository.Update(genero);
+    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
+    return Results.NoContent();
 });
 
 // End Middleware area 

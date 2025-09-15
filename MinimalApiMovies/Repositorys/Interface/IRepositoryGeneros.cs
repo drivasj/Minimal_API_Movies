@@ -7,5 +7,8 @@ namespace MinimalApiMovies.Repositorys.Interface
         Task<List<Genero>> GetAll();
         Task<Genero?> GetId(int id);
         Task<int> Create(Genero genero);
+        Task<bool> Exist(int id);
+        Task Update(Genero genero);
+
     }
 }
