@@ -10,5 +10,7 @@ namespace MinimalApiMovies.Repositorys.Interface
         Task<bool> Exist(int id);
         Task Update(Genero genero);
 
+        Task Delete(int id);
+
     }
 }

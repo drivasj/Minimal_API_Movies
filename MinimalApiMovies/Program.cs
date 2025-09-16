@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -83,8 +82,7 @@ app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository, IOu
     return Results.Created($"/generos/{id}", genero);
 });
 
-//
-
+// Actualizar un genero
 app.MapPut("/generos/{id:int}", async (int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
 {
     var exist = await repository.Exist(id);
@@ -98,6 +96,23 @@ app.MapPut("/generos/{id:int}", async (int id, Genero genero, IRepositoryGeneros
     await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
     return Results.NoContent();
 });
+
+// Eliminar un genero
+app.MapDelete("/generos/{id:int}", async (int id, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
+{
+    var exist = await repository.Exist(id);
+
+    if (!exist)
+    {
+        return Results.NotFound();
+    }
+
+    await repository.Delete(id);
+    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
+    return Results.NoContent();
+
+});
+
 
 // End Middleware area 
 

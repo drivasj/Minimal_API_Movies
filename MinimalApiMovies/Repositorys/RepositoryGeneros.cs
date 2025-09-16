@@ -20,6 +20,11 @@ namespace MinimalApiMovies.Repositorys
             return genero.Id;
         }
 
+        public async Task Delete(int id)
+        {
+            await context.Generos.Where(x => x.Id == id).ExecuteDeleteAsync();
+        }
+
         public async Task<bool> Exist(int id)
         {
             return await context.Generos.AnyAsync(x=>x.Id == id);
