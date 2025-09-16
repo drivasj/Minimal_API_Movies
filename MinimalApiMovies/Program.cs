@@ -53,15 +53,17 @@ app.UseOutputCache();
 
 app.MapGet("/", [EnableCors(policyName: "libre")] () => "Hello Worldd!");
 
+var endPointsGeneros = app.MapGroup("/generos");
+
 // Obtener todos los generos
-app.MapGet("/generos", async (IRepositoryGeneros repository) =>
+endPointsGeneros.MapGet("/", async (IRepositoryGeneros repository) =>
 {
     return await repository.GetAll();
 
 }).CacheOutput(c=>c.Expire(TimeSpan.FromSeconds(60)).Tag("generos-get"));
 
 // Obtener un genero por Id
-app.MapGet("/generos/{id:int}", async (IRepositoryGeneros repository, int id) =>
+endPointsGeneros.MapGet("/{id:int}", async (IRepositoryGeneros repository, int id) =>
 {
     var genero = await repository.GetId(id);
 
@@ -73,9 +75,8 @@ app.MapGet("/generos/{id:int}", async (IRepositoryGeneros repository, int id) =>
 
 });
 
-
 // Crear un genero
-app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
+endPointsGeneros.MapPost("/", async (Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
 {
     var id = await repository.Create(genero);
     await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
@@ -83,7 +84,7 @@ app.MapPost("/generos", async (Genero genero, IRepositoryGeneros repository, IOu
 });
 
 // Actualizar un genero
-app.MapPut("/generos/{id:int}", async (int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
+endPointsGeneros.MapPut("/{id:int}", async (int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
 {
     var exist = await repository.Exist(id);
 
@@ -98,7 +99,7 @@ app.MapPut("/generos/{id:int}", async (int id, Genero genero, IRepositoryGeneros
 });
 
 // Eliminar un genero
-app.MapDelete("/generos/{id:int}", async (int id, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
+endPointsGeneros.MapDelete("/{id:int}", async (int id, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
 {
     var exist = await repository.Exist(id);
 
@@ -112,7 +113,6 @@ app.MapDelete("/generos/{id:int}", async (int id, IRepositoryGeneros repository,
     return Results.NoContent();
 
 });
-
 
 // End Middleware area 
 
