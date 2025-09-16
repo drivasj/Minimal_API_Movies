@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using MinimalApiMovies;
 using MinimalApiMovies.Entities;
+using MinimalApiMovies.Migrations;
 using MinimalApiMovies.Repositorys;
 using MinimalApiMovies.Repositorys.Interface;
 
@@ -11,7 +13,7 @@ var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermiti
 // Services area
 
 //SQL SERVER
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer("name=DefaultConnection"));
 
 // Enable Cors
@@ -24,7 +26,7 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("libre", configuration =>
     {
-       configuration.AllowAnyOrigin().AllowAnyOrigin().AllowAnyMethod();  //  (Any website can communicate with us in any way.);
+        configuration.AllowAnyOrigin().AllowAnyOrigin().AllowAnyMethod();  //  (Any website can communicate with us in any way.);
     });
 });
 
@@ -42,7 +44,7 @@ builder.Services.AddScoped<IRepositoryGeneros, RepositoryGeneros>();
 var app = builder.Build();
 
 // Middleware area
-if (builder.Environment.IsDevelopment()) 
+if (builder.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -56,66 +58,80 @@ app.MapGet("/", [EnableCors(policyName: "libre")] () => "Hello Worldd!");
 var endPointsGeneros = app.MapGroup("/generos");
 
 // Obtener todos los generos
-endPointsGeneros.MapGet("/", async (IRepositoryGeneros repository) =>
-{
-    return await repository.GetAll();
-
-}).CacheOutput(c=>c.Expire(TimeSpan.FromSeconds(60)).Tag("generos-get"));
+endPointsGeneros.MapGet("/", GetAllGeneros).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(60)).Tag("generos-get"));
 
 // Obtener un genero por Id
-endPointsGeneros.MapGet("/{id:int}", async (IRepositoryGeneros repository, int id) =>
-{
-    var genero = await repository.GetId(id);
-
-    if(genero is null)
-    {
-        return Results.NotFound();
-    }
-    return Results.Ok(genero);
-
-});
+endPointsGeneros.MapGet("/{id:int}", GetGeneroId);
 
 // Crear un genero
-endPointsGeneros.MapPost("/", async (Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
-{
-    var id = await repository.Create(genero);
-    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
-    return Results.Created($"/generos/{id}", genero);
-});
+endPointsGeneros.MapPost("/", CreateGenero);
 
 // Actualizar un genero
-endPointsGeneros.MapPut("/{id:int}", async (int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
-{
-    var exist = await repository.Exist(id);
-
-    if (!exist)
-    {
-        return Results.NotFound();
-    }
-
-    await repository.Update(genero);
-    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
-    return Results.NoContent();
-});
+endPointsGeneros.MapPut("/{id:int}", UpdateGenero);
 
 // Eliminar un genero
-endPointsGeneros.MapDelete("/{id:int}", async (int id, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore) =>
-{
-    var exist = await repository.Exist(id);
+endPointsGeneros.MapDelete("/{id:int}", DeleteGenero);
 
-    if (!exist)
-    {
-        return Results.NotFound();
-    }
+//End Middleware area 
 
-    await repository.Delete(id);
-    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
-    return Results.NoContent();
-
-});
-
-// End Middleware area 
 
 app.Run();
 
 //dotnet tool install --global dotnet-ef
+
+//Obtener todos los generos
+static async Task<Ok<List<Genero>>> GetAllGeneros(IRepositoryGeneros repository)
+{
+    var generos = await repository.GetAll();
+    return TypedResults.Ok(generos);
+}
+
+//Obtener un genero por Id
+static async Task<Results<Ok<Genero>, NotFound>> GetGeneroId(IRepositoryGeneros repository, int id)
+{
+    var genero = await repository.GetId(id);
+
+    if (genero is null)
+    {
+        return TypedResults.NotFound();
+    }
+    return TypedResults.Ok(genero);
+}
+
+//Crear un genero
+static async Task<Created<Genero>> CreateGenero(Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
+{
+    var id = await repository.Create(genero);
+    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
+    return TypedResults.Created($"/generos/{id}", genero);
+}
+
+//Actualizar Genero
+static async Task<Results<NoContent, NotFound>> UpdateGenero(int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
+{
+    var exist = await repository.Exist(id);
+
+    if (!exist)
+    {
+        return TypedResults.NotFound();
+    }
+
+    await repository.Update(genero);
+    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
+    return TypedResults.NoContent();
+}
+
+static async Task<Results<NoContent, NotFound>> DeleteGenero(int id, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
+{
+    var exist = await repository.Exist(id);
+
+    if (!exist)
+    {
+        return TypedResults.NotFound();
+    }
+
+    await repository.Delete(id);
+    await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
+    return TypedResults.NoContent();
+
+}
