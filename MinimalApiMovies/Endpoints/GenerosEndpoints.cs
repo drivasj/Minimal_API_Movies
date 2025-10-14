@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
+using MinimalApiMovies.DTOs;
 using MinimalApiMovies.Entities;
 using MinimalApiMovies.Repositorys.Interface;
 
@@ -24,22 +25,22 @@ namespace MinimalApiMovies.Endpoints
             // Eliminar un genero
             group.MapDelete("/{id:int}", DeleteGenero);
 
-
-
-
             return group;
         }
 
 
         //Obtener todos los generos
-        static async Task<Ok<List<Genero>>> GetAllGeneros(IRepositoryGeneros repository)
+        static async Task<Ok<List<GeneroDTO>>> GetAllGeneros(IRepositoryGeneros repository)
         {
             var generos = await repository.GetAll();
-            return TypedResults.Ok(generos);
+
+            var generosDTO = generos.Select(x => new GeneroDTO { Id = x.Id, Name = x.Name }).ToList();
+
+            return TypedResults.Ok(generosDTO);
         }
 
         //Obtener un genero por Id
-        static async Task<Results<Ok<Genero>, NotFound>> GetGeneroId(IRepositoryGeneros repository, int id)
+        static async Task<Results<Ok<GeneroDTO>, NotFound>> GetGeneroId(IRepositoryGeneros repository, int id)
         {
             var genero = await repository.GetId(id);
 
@@ -47,19 +48,42 @@ namespace MinimalApiMovies.Endpoints
             {
                 return TypedResults.NotFound();
             }
-            return TypedResults.Ok(genero);
+
+            var generoDTO = new GeneroDTO
+            {
+                Id = id,
+                Name = genero.Name
+            };
+
+            return TypedResults.Ok(generoDTO);
         }
 
         //Crear un genero
-        static async Task<Created<Genero>> CreateGenero(Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
+        static async Task<Created<GeneroDTO>> CreateGenero(CreateGeneroDTO  createGeneroDTO, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
         {
+
+            var genero = new Genero
+            {
+                Name = createGeneroDTO.Name
+            };
+
             var id = await repository.Create(genero);
             await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
-            return TypedResults.Created($"/generos/{id}", genero);
+
+            var generoDTO = new GeneroDTO
+            {
+                Id = id,
+                Name = genero.Name
+            };
+
+            return TypedResults.Created($"/generos/{id}", generoDTO);
+
+
         }
 
         //Actualizar Genero
-        static async Task<Results<NoContent, NotFound>> UpdateGenero(int id, Genero genero, IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
+        static async Task<Results<NoContent, NotFound>> UpdateGenero(int id, CreateGeneroDTO  createGeneroDTO, 
+            IRepositoryGeneros repository, IOutputCacheStore outputCacheStore)
         {
             var exist = await repository.Exist(id);
 
@@ -67,6 +91,11 @@ namespace MinimalApiMovies.Endpoints
             {
                 return TypedResults.NotFound();
             }
+
+            var genero = new Genero
+            {
+                Name = createGeneroDTO.Name
+            };
 
             await repository.Update(genero);
             await outputCacheStore.EvictByTagAsync("generos-get", default); // Clean cache generos-get
