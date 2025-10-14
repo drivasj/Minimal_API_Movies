@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MinimalApiMovies;
 using MinimalApiMovies.Endpoints;
 using MinimalApiMovies.Entities;
@@ -40,6 +41,9 @@ builder.Services.AddSwaggerGen();
 
 //Interfaces
 builder.Services.AddScoped<IRepositoryGeneros, RepositoryGeneros>();
+
+//Automapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 // End services area
 var app = builder.Build();
