@@ -41,6 +41,8 @@ builder.Services.AddSwaggerGen();
 
 //Interfaces
 builder.Services.AddScoped<IRepositoryGeneros, RepositoryGeneros>();
+builder.Services.AddScoped<IRepositoryActores, RepositoryActores>();
+
 
 //Automapper
 builder.Services.AddAutoMapper(typeof(Program));
