@@ -43,7 +43,7 @@ namespace MinimalApiMovies.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Actores");
+                    b.ToTable("Actores", (string)null);
                 });
 
             modelBuilder.Entity("MinimalApiMovies.Entities.Genero", b =>
@@ -60,7 +60,7 @@ namespace MinimalApiMovies.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Generos");
+                    b.ToTable("Generos", (string)null);
                 });
 #pragma warning restore 612, 618
         }

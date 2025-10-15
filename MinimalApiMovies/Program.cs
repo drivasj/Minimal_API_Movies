@@ -63,6 +63,8 @@ app.UseOutputCache();
 app.MapGet("/", [EnableCors(policyName: "libre")] () => "Hello Worldd!");
 
 app.MapGroup("/generos").MapGeneros();
+app.MapGroup("/actores").MapActores();
+
 
 //End Middleware area 
 

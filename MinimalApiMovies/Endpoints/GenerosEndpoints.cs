@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
-using MinimalApiMovies.DTOs;
+using MinimalApiMovies.DTOs.Genero;
 using MinimalApiMovies.Entities;
 using MinimalApiMovies.Repositorys.Interface;
 

@@ -1,4 +1,4 @@
-﻿namespace MinimalApiMovies.DTOs
+﻿namespace MinimalApiMovies.DTOs.Genero
 {
     public class GeneroDTO
     {

@@ -1,6 +1,6 @@
-﻿namespace MinimalApiMovies.Entities
+﻿namespace MinimalApiMovies.DTOs.Actores
 {
-    public class Actor
+    public class ActorDTO
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;
